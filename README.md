@@ -57,10 +57,10 @@ npm run seed:admin
 
 ## Git, CI/CD, and Deployment
 
-This repository contains both applications:
+This repository contains the frontend and backend in one Vercel project:
 
-- Vercel: deploys the React frontend from the repository root using `vercel.json`.
-- Render: deploys the Express API using `render.yaml`. MongoDB, Razorpay, Cloudinary, and SMTP remain backend environment variables.
+- Vercel: deploys the React frontend and the Express API. `api/[...path].js` exposes the backend under `/api/*`, while `vercel.json` keeps React Router fallback working.
+- Render: `render.yaml` remains available as an alternative backend deployment. MongoDB, Razorpay, Cloudinary, and SMTP remain server-side environment variables.
 - GitHub Actions: `.github/workflows/ci.yml` runs lint, frontend build, and production dependency audit on every pull request and `main` push.
 
 ### First GitHub push
@@ -76,7 +76,7 @@ Never add `.env` to Git. The current `.env` is ignored, but any credentials prev
 ### Deployment order
 
 1. Push the repository to GitHub and wait for the Actions workflow to pass.
-2. Create a Render Web Service from the repository. Render can use `render.yaml`, then set all `sync: false` values in the service environment.
-3. Set the deployed Render API URL as Vercel's `VITE_API_URL` and deploy the project root.
-4. Set the Render `CLIENT_URL` to the final Vercel URL.
-5. Configure Razorpay's webhook to `https://your-api-domain.com/api/payments/razorpay/webhook`.
+2. Import the repository into Vercel with the project root as the Root Directory.
+3. Add all backend variables from `.env.example` to Vercel. Set `CLIENT_URL` to the Vercel URL and `VITE_API_URL` to `/api`.
+4. Deploy. Test `https://your-project.vercel.app/api/health` before testing login or checkout.
+5. Configure Razorpay's webhook to `https://your-project.vercel.app/api/payments/razorpay/webhook`.

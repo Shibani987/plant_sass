@@ -7,6 +7,12 @@ export const connectDb = async () => {
     throw new Error("MONGO_URI is missing. Copy .env.example to .env and set it.");
   }
 
+  if (mongoose.connection.readyState === 1) return;
+  if (mongoose.connection.readyState === 2) {
+    await mongoose.connection.asPromise();
+    return;
+  }
+
   mongoose.set("strictQuery", true);
   await mongoose.connect(mongoUri);
   console.log("MongoDB connected");
