@@ -18,6 +18,7 @@ import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1);
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 300,
@@ -38,6 +39,10 @@ app.use(express.json({
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "plant-saas-api" });
+});
+
+app.get("/api", (_req, res) => {
+  res.json({ ok: true, service: "plant-saas-api", health: "/api/health" });
 });
 
 app.use("/api/auth", authRoutes);
