@@ -2,6 +2,10 @@ import { Play } from "lucide-react";
 import ronnieImage from "../../assets/images/reviews/Ronnie Hamill.png";
 
 const Hero = () => {
+  const handleBuyNow = () => {
+    document.getElementById("top-selling")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div
       className="
@@ -63,6 +67,7 @@ const Hero = () => {
           {/* BUY NOW */}
           <button
             type="button"
+            onClick={handleBuyNow}
             className="
               rounded-[10px] border border-white bg-transparent
               px-6 py-2.5 text-xs font-normal text-white

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const O2Card = ({
   item,
   currentSlide = 1,
@@ -234,8 +236,8 @@ const O2Card = ({
             "
           >
             {/* ================= EXPLORE BUTTON ================= */}
-            <button
-              type="button"
+            <Link
+              to="/products"
               className="
                 rounded-md
                 border border-white/40
@@ -258,7 +260,7 @@ const O2Card = ({
               "
             >
               Explore
-            </button>
+            </Link>
 
             {/* ================= SLIDE INDICATOR ================= */}
             <div

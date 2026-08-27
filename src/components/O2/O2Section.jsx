@@ -1,24 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import SectionHeading from "../common/SectionHeading";
 import O2Card from "./O2Card";
-import { o2Data } from "../../data/o2Data";
+import { api } from "../../services/api";
 
 const O2Section = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [o2Content, setO2Content] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const sectionRef = useRef(null);
 
-  const totalSlides = o2Data.length;
-  const currentSlide = o2Data[currentIndex];
+  const totalSlides = o2Content.length;
+  const currentSlide = o2Content[currentIndex];
+
+  useEffect(() => {
+    api.get("/o2").then(({ data }) => setO2Content(data)).finally(() => setIsLoading(false));
+  }, []);
 
   const goToNext = () => {
+    if (!totalSlides) return;
     setCurrentIndex((prevIndex) => {
       return (prevIndex + 1) % totalSlides;
     });
   };
 
   const goToPrevious = () => {
+    if (!totalSlides) return;
     setCurrentIndex((prevIndex) => {
       return (prevIndex - 1 + totalSlides) % totalSlides;
     });
@@ -46,11 +54,11 @@ const O2Section = () => {
 
   /* Preload Slide Images */
   useEffect(() => {
-    o2Data.forEach(({ image }) => {
+    o2Content.forEach(({ image }) => {
       const img = new Image();
       img.src = image;
     });
-  }, []);
+  }, [o2Content]);
 
   return (
     <section
@@ -82,14 +90,18 @@ const O2Section = () => {
               : "opacity-0"
           }
         >
-          <O2Card
-            key={currentSlide.id}
-            item={currentSlide}
-            currentSlide={currentIndex + 1}
-            totalSlides={totalSlides}
-            onNext={goToNext}
-            onPrevious={goToPrevious}
-          />
+          {currentSlide ? (
+            <O2Card
+              key={currentSlide._id}
+              item={currentSlide}
+              currentSlide={currentIndex + 1}
+              totalSlides={totalSlides}
+              onNext={goToNext}
+              onPrevious={goToPrevious}
+            />
+          ) : !isLoading ? (
+            <p className="py-20 text-center text-white/60">No best O2 content available yet.</p>
+          ) : null}
         </div>
       </div>
 
@@ -99,12 +111,12 @@ const O2Section = () => {
           mt-12 flex items-center justify-center gap-2
         "
       >
-        {o2Data.map((item, index) => {
+        {o2Content.map((item, index) => {
           const isActive = index === currentIndex;
 
           return (
             <button
-              key={item.id}
+              key={item._id}
               type="button"
               onClick={() => setCurrentIndex(index)}
               aria-label={`Go to slide ${index + 1}`}

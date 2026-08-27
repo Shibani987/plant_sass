@@ -1,27 +1,29 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CustomCard from "../common/CustomCard";
-import { featuredPlants } from "../../data/featuredPlants";
-
-const AUTO_PLAY_MS = 3000;
+import { api } from "../../services/api";
 
 const FeaturedCard = () => {
+  const [plants, setPlants] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const currentPlant = featuredPlants[currentIndex];
-
-  /* ================= NEXT SLIDE ================= */
-  const goToNext = useCallback(() => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex + 1) % featuredPlants.length
-    );
+  useEffect(() => {
+    api.get("/hero/featured")
+      .then(({ data }) => setPlants(Array.isArray(data) ? data : []))
+      .catch(() => {});
   }, []);
 
-  /* ================= AUTO PLAY ================= */
   useEffect(() => {
-    const interval = setInterval(goToNext, AUTO_PLAY_MS);
-
+    if (plants.length < 2) return undefined;
+    const interval = setInterval(() => {
+      setCurrentIndex((index) => (index + 1) % plants.length);
+    }, 3000);
     return () => clearInterval(interval);
-  }, [goToNext]);
+  }, [plants.length]);
+
+  if (!plants.length) return null;
+
+  const currentPlant = plants[currentIndex % plants.length];
+  const goToNext = () => setCurrentIndex((index) => (index + 1) % plants.length);
 
   return (
     <div
@@ -127,40 +129,17 @@ const FeaturedCard = () => {
               type="button"
               onClick={goToNext}
               aria-label="Next plant"
-              className="
-                group
-                flex h-9 w-9 shrink-0
-                items-center justify-center
-
-                text-3xl font-light
-                leading-none text-white/80
-
-                transition-all duration-300
-                hover:translate-x-1
-                hover:text-white
-
-                sm:h-10 sm:w-10
-                sm:text-4xl
-
-                min-[1500px]:h-[3vw]
-                min-[1500px]:w-[3vw]
-                min-[1500px]:text-[2.5vw]
-              "
+              className="flex h-9 w-9 shrink-0 items-center justify-center text-3xl font-light leading-none text-white/80 transition-all duration-300 hover:translate-x-1 hover:text-white sm:h-10 sm:w-10 sm:text-4xl"
             >
-              <span
-                className="
-                  transition-transform duration-300
-                  group-hover:translate-x-1
-                "
-              >
-                ›
-              </span>
+              ›
             </button>
+
           </div>
 
           {/* ================= BUY BUTTON ================= */}
           <button
             type="button"
+            onClick={() => document.getElementById("top-selling")?.scrollIntoView({ behavior: "smooth", block: "start" })}
             className="
               mt-3 rounded-md border border-white
               bg-transparent px-5 py-2
@@ -185,50 +164,18 @@ const FeaturedCard = () => {
           </button>
         </div>
 
-        {/* ================= BOTTOM DOTS ================= */}
-        <div
-          className="
-            absolute bottom-6 left-1/2 z-30
-            flex -translate-x-1/2 items-center gap-2
-
-            opacity-0
-            animate-[fadeInUp_0.6s_ease-out_1s_forwards]
-
-            sm:bottom-8
-
-            min-[1500px]:bottom-[3.2vw]
-            min-[1500px]:gap-[1vw]
-          "
-        >
-          {featuredPlants.map((plant, index) => {
-            const isActive = index === currentIndex;
-
-            return (
-              <button
-                key={plant.id}
-                type="button"
-                onClick={() => setCurrentIndex(index)}
-                aria-label={`Go to ${plant.name}`}
-                className={`
-                  rounded-full
-                  transition-all duration-300
-
-                  ${
-                    isActive
-                      ? "h-1.5 w-6 bg-white"
-                      : "h-1.5 w-1.5 bg-white/40 hover:bg-white/70"
-                  }
-
-                  min-[1500px]:${
-                    isActive
-                      ? "h-[0.65vw] w-[1.6vw]"
-                      : "h-[0.65vw] w-[0.65vw]"
-                  }
-                `}
-              />
-            );
-          })}
+        <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 sm:bottom-8">
+          {plants.map((plant, index) => (
+            <button
+              key={plant._id}
+              type="button"
+              onClick={() => setCurrentIndex(index)}
+              aria-label={`Go to ${plant.name}`}
+              className={`rounded-full transition-all duration-300 ${index === currentIndex ? "h-1.5 w-6 bg-white" : "h-1.5 w-1.5 bg-white/40 hover:bg-white/70"}`}
+            />
+          ))}
         </div>
+
       </CustomCard>
 
       {/* ================= CURRENT PLANT IMAGE ================= */}

@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import SectionHeading from "../common/SectionHeading";
 import TrendyPlantCard from "./TrendyPlantCard";
-import { trendyPlantsData } from "../../data/trendyPlantsData";
+import { api } from "../../services/api";
 
 const TrendyPlants = () => {
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [plants, setPlants] = useState([]);
+
+  useEffect(() => {
+    api.get("/trendy")
+      .then(({ data }) => setPlants(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const currentSection = sectionRef.current;
@@ -74,9 +81,9 @@ const TrendyPlants = () => {
           min-[1400px]:gap-[9vw]
         "
       >
-        {trendyPlantsData.map((plant, index) => (
+        {plants.map((plant, index) => (
           <div
-            key={plant.id}
+            key={plant._id || plant.itemId}
             className={
               isVisible
                 ? "animate-trendy-section-reveal"

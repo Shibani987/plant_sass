@@ -1,18 +1,39 @@
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import PlantCard from "./PlantCard";
-import { plantsData } from "../../data/plantsData";
 import SectionHeading from "../common/SectionHeading";
+import { api } from "../../services/api";
+import { addToCart } from "../../features/cart/cartSlice";
 
 const TopSelling = () => {
-  const [cart, setCart] = useState([]);
+  const dispatch = useDispatch();
+  const [trendingPlants, setTrendingPlants] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
 
   const sectionRef = useRef(null);
 
-  const handleAddToCart = (plant) => {
-    setCart((prevCart) => [...prevCart, plant]);
+  useEffect(() => {
+    api
+      .get("/products")
+      .then(({ data }) => {
+        setTrendingPlants(
+          data
+            .filter((product) => product.tags?.includes("Trending"))
+            .map((product) => ({
+              id: product._id,
+              name: product.name,
+              description: product.description,
+              price: product.price,
+              image: product.images?.[0],
+            })),
+        );
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
-    console.log("Added to cart:", plant);
+  const handleAddToCart = (plant) => {
+    dispatch(addToCart(plant));
   };
 
   /* ================= SCROLL REVEAL OBSERVER ================= */
@@ -43,6 +64,7 @@ const TopSelling = () => {
   return (
     <section
       ref={sectionRef}
+      id="top-selling"
       className="
         mx-auto w-full
         max-w-[1400px]
@@ -84,7 +106,7 @@ const TopSelling = () => {
           min-[1400px]:gap-[clamp(2.5rem,3vw,5rem)]
         "
       >
-        {plantsData.map((plant, index) => (
+        {trendingPlants.map((plant, index) => (
           <div
             key={plant.id}
             className={
@@ -102,24 +124,11 @@ const TopSelling = () => {
             />
           </div>
         ))}
+        {!isLoading && trendingPlants.length === 0 && (
+          <p className="col-span-full text-center text-white/60">No trending plants available yet.</p>
+        )}
       </div>
 
-      {/* ================= CART COUNT ================= */}
-
-      {cart.length > 0 && (
-        <p
-          className="
-            mt-10
-            text-center
-            text-sm
-            text-white/60
-
-            min-[1400px]:text-[clamp(1rem,1.1vw,1.5rem)]
-          "
-        >
-          Cart items: {cart.length}
-        </p>
-      )}
     </section>
   );
 };

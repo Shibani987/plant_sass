@@ -1,7 +1,15 @@
 import { Search } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import cartIcon from "../../assets/icons/cart.png";
+import { logout } from "../../features/auth/authSlice";
 
 const NavbarActions = ({ isMenuOpen, setIsMenuOpen }) => {
+  const dispatch = useDispatch();
+  const cartCount = useSelector((state) => state.cart.items.reduce((sum, item) => sum + item.quantity, 0));
+  const user = useSelector((state) => state.auth.user);
+  const dashboardPath = user?.role === "vendor" ? "/vendor" : user?.role === "super_admin" ? "/admin" : "/orders";
+
   return (
     <div
       className="
@@ -15,8 +23,8 @@ const NavbarActions = ({ isMenuOpen, setIsMenuOpen }) => {
       "
     >
       {/* Search */}
-      <button
-        type="button"
+      <Link
+        to="/products"
         aria-label="Search"
         className="
           flex items-center justify-center
@@ -33,14 +41,14 @@ const NavbarActions = ({ isMenuOpen, setIsMenuOpen }) => {
             min-[1400px]:w-[clamp(25px,2vw,48px)]
           "
         />
-      </button>
+      </Link>
 
       {/* Cart */}
-      <button
-        type="button"
+      <Link
+        to="/cart"
         aria-label="Shopping bag"
         className="
-          flex items-center justify-center
+          relative flex items-center justify-center
           text-white/90
           transition-all duration-200
           hover:scale-110 hover:text-white
@@ -58,7 +66,35 @@ const NavbarActions = ({ isMenuOpen, setIsMenuOpen }) => {
             min-[1400px]:w-[clamp(27px,2vw,50px)]
           "
         />
-      </button>
+        {cartCount > 0 && (
+          <span className="absolute -right-2 -top-2 z-10 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-[#10190f] bg-[#e6b84a] px-1 text-[10px] font-black text-[#172312]">
+            {cartCount}
+          </span>
+        )}
+      </Link>
+
+      {user ? (
+        <div className="hidden items-center gap-2 sm:flex">
+          <Link to={dashboardPath} className="max-w-[150px] text-right text-xs text-white/90 transition hover:text-white">
+            <span className="block truncate font-bold">{user.name}</span>
+            <span className="block text-[10px] uppercase tracking-[0.12em] text-white/60">{user.role.replace("_", " ")}</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => dispatch(logout())}
+            className="rounded-md border border-white/25 px-3 py-2 text-xs font-bold text-white/90 transition hover:bg-white/10"
+          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <Link
+          to="/login"
+          className="hidden rounded-md border border-white/25 px-3 py-2 text-xs font-bold text-white/90 transition hover:bg-white/10 sm:block"
+        >
+          Login
+        </Link>
+      )}
 
       {/* Animated Menu - Mobile + Desktop */}
       <button

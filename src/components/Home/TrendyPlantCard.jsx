@@ -1,4 +1,8 @@
 import cartIcon from "../../assets/icons/cart.png";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { addToCart } from "../../features/cart/cartSlice";
+import { formatINR, toINRAmount } from "../../utils/currency";
 
 const TrendyPlantCard = ({
   image,
@@ -6,8 +10,11 @@ const TrendyPlantCard = ({
   title,
   description,
   price,
+  itemId,
+  _id,
   reverse = false,
 }) => {
+  const dispatch = useDispatch();
   const imagePosition = reverse
     ? `
         md:right-4
@@ -58,7 +65,7 @@ const TrendyPlantCard = ({
       {/* ================= PLANT IMAGE ================= */}
       <div
         className="
-          relative z-20 flex h-[180px] w-full
+          pointer-events-none relative z-20 flex h-[180px] w-full
           items-center justify-center
 
           sm:h-[210px]
@@ -157,7 +164,7 @@ const TrendyPlantCard = ({
             min-[1400px]:text-[2.5vw]
           "
         >
-          {price}
+          {formatINR(price)}
         </span>
 
         {/* ================= ACTION BUTTONS ================= */}
@@ -172,8 +179,8 @@ const TrendyPlantCard = ({
           "
         >
           {/* Explore Button */}
-          <button
-            type="button"
+          <Link
+            to="/products"
             className="
               rounded-lg border border-white/70
               bg-transparent
@@ -201,12 +208,19 @@ const TrendyPlantCard = ({
             "
           >
             Explore
-          </button>
+          </Link>
 
           {/* Cart Button */}
           <button
             type="button"
             aria-label={`Add ${title} to cart`}
+            onClick={() => dispatch(addToCart({
+              id: `trendy-${itemId || _id}`,
+              name: title,
+              description,
+              price: toINRAmount(price),
+              image,
+            }))}
             className="
               flex h-10 w-10 items-center justify-center
 
