@@ -1,5 +1,7 @@
 # Plant SaaS E-Commerce Platform
 
+**Live Demo:** [https://plant-sass.vercel.app/](https://plant-sass.vercel.app/)
+
 A multi-tenant plant e-commerce SaaS platform. The original static storefront is still available as the public landing page, and the app now includes customer shopping, vendor inventory management, super admin oversight, tenant-aware backend APIs, payments, uploads, email hooks, and analytics.
 
 ## Tech Stack
